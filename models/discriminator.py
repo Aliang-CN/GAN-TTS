@@ -2,6 +2,7 @@ import torch.nn as nn
 from .modules import Conv1d
 import numpy as np
 
+
 class Multiple_Random_Window_Discriminators(nn.Module):
     def __init__(self,
                  lc_channels,
@@ -38,24 +39,24 @@ class Multiple_Random_Window_Discriminators(nn.Module):
     def forward(self, real_samples, fake_samples, conditions):
 
         real_outputs, fake_outputs = [], []
-        #unconditional discriminator
+        # unconditional discriminator
         for (size, layer) in zip(self.window_size, self.udiscriminators):
             size = size * self.upsample_factor
             index = np.random.randint(real_samples.size()[-1] - size)
 
-            real_output = layer(real_samples[:, :, index : index + size])
+            real_output = layer(real_samples[:, :, index: index + size])
             real_outputs.append(real_output)
 
-            fake_output = layer(fake_samples[:, :, index : index + size])
+            fake_output = layer(fake_samples[:, :, index: index + size])
             fake_outputs.append(fake_output)
 
-        #conditional discriminator
+        # conditional discriminator
         for (size, layer) in zip(self.window_size, self.discriminators):
             lc_index = np.random.randint(conditions.size()[-1] - size)
             sample_index = lc_index * self.upsample_factor
-            real_x = real_samples[:, :, sample_index : (lc_index + size) * self.upsample_factor]
-            fake_x = fake_samples[:, :, sample_index : (lc_index + size) * self.upsample_factor]
-            lc = conditions[:, :, lc_index : lc_index + size]
+            real_x = real_samples[:, :, sample_index: (lc_index + size) * self.upsample_factor]
+            fake_x = fake_samples[:, :, sample_index: (lc_index + size) * self.upsample_factor]
+            lc = conditions[:, :, lc_index: lc_index + size]
 
             real_output = layer(real_x, lc)
             real_outputs.append(real_output)
@@ -63,6 +64,7 @@ class Multiple_Random_Window_Discriminators(nn.Module):
             fake_outputs.append(fake_output)
 
         return real_outputs, fake_outputs
+
 
 class CondDBlock(nn.Module):
     def __init__(self,
@@ -98,6 +100,7 @@ class CondDBlock(nn.Module):
 
         return outputs
 
+
 class DBlock(nn.Module):
     def __init__(self,
                  in_channels,
@@ -125,6 +128,7 @@ class DBlock(nn.Module):
         outputs = self.layers(inputs) + self.residual(inputs)
 
         return outputs
+
 
 class ConditionalDBlocks(nn.Module):
     def __init__(self,
@@ -166,6 +170,7 @@ class ConditionalDBlocks(nn.Module):
 
         return outputs
 
+
 class UnConditionalDBlocks(nn.Module):
     def __init__(self,
                  in_channels,
@@ -193,6 +198,7 @@ class UnConditionalDBlocks(nn.Module):
             outputs = layer(outputs)
 
         return outputs
+
 
 '''
 model = Multiple_Random_Window_Discriminators(567)

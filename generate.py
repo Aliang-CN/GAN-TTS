@@ -7,6 +7,7 @@ import numpy as np
 from models.generator import Generator
 from utils.util import mu_law_encode, mu_law_decode
 
+
 def attempt_to_restore(generate, checkpoint_dir, use_cuda):
     checkpoint_list = os.path.join(checkpoint_dir, 'checkpoint')
 
@@ -18,6 +19,7 @@ def attempt_to_restore(generate, checkpoint_dir, use_cuda):
         checkpoint = load_checkpoint(checkpoint_path, use_cuda)
         generate.load_state_dict(checkpoint["generator"])
 
+
 def load_checkpoint(checkpoint_path, use_cuda):
     if use_cuda:
         checkpoint = torch.load(checkpoint_path)
@@ -26,17 +28,17 @@ def load_checkpoint(checkpoint_path, use_cuda):
             checkpoint_path, map_location=lambda storage, loc: storage)
     return checkpoint
 
-def create_model(args):
 
+def create_model(args):
     generator = Generator(args.local_condition_dim, args.z_dim)
 
     return generator
 
-def synthesis(args):
 
+def synthesis(args):
     model = create_model(args)
     if args.resume is not None:
-       attempt_to_restore(model, args.resume, args.use_cuda)
+        attempt_to_restore(model, args.resume, args.use_cuda)
 
     device = torch.device("cuda" if args.use_cuda else "cpu")
     model.to(device)
@@ -68,8 +70,8 @@ def synthesis(args):
 
     print("Average RTF: {:.3f}".format(sum(avg_rtf) / len(avg_rtf)))
 
-def main():
 
+def main():
     def _str_to_bool(s):
         """Convert string to bool (in argparse context)."""
         if s.lower() not in ['true', 'false']:
@@ -77,10 +79,9 @@ def main():
                              'boolean, got {}'.format(s))
         return {'true': True, 'false': False}[s.lower()]
 
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str, default='data/test', help='Directory of tests data')
-    parser.add_argument('--num_workers',type=int, default=4, help='Number of dataloader workers.')
+    parser.add_argument('--num_workers', type=int, default=4, help='Number of dataloader workers.')
     parser.add_argument('--resume', type=str, default="logdir")
     parser.add_argument('--local_condition_dim', type=int, default=80)
     parser.add_argument('--z_dim', type=int, default=128)
@@ -88,6 +89,7 @@ def main():
 
     args = parser.parse_args()
     synthesis(args)
+
 
 if __name__ == "__main__":
     main()
